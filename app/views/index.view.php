@@ -49,9 +49,7 @@
 					);
 				}
 
-				//echo "<li><a href=\"?a={$href}\">{$folder}</a></li>";
 				echo "<tr>";
-				//echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$folder\"></label></td>";
 
 				if (preg_match('~[0-9]~', $folder) === 1) {
 					echo "<td>{$folder}</td>";
@@ -64,9 +62,7 @@
 			}
 
 			foreach ($files as $file) {
-				//echo "<li>{$file}</li>";
 				echo "<tr>";
-				//echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$file\"></label></td>";
 				echo "<td>$file</a></td>";
 				echo "<td>".human_filesize(filesize($fullpath . "/" . $file))."</td>";
 				echo "</tr>";
