@@ -7,24 +7,50 @@ class PagesController {
 	public function home() {
 
 		$root = $_SERVER['DOCUMENT_ROOT'];
-		$requestUri = explode('?', $_SERVER['REQUEST_URI']);
 
-		if (isset($requestUri[1])) {
-			$leftUri = explode('&', $requestUri[1])[0];
-			$rightUri = explode('&', $requestUri[1])[1];
-		}
-
-		// ?a=...&b=...
-		$leftPath = isset($leftUri)
-					? explode('=', $leftUri)[1] : '';
-		$leftPath = urldecode($leftPath);
+		$leftPath = isset($_GET['a']) ? urldecode($_GET['a']) : '';
 		$leftFullpath = $root . ($leftPath !== '' ? '/' : '') . $leftPath;
 
-		// ?a=...&b=...
-		$rightPath = isset($rightUri)
-					? explode('=', $rightUri)[1] : '';
-		$rightPath = urldecode($rightPath);
+		$rightPath = isset($_GET['b']) ? urldecode($_GET['b']) : '';
 		$rightFullpath = $root . ($rightPath !== '' ? '/' : '') . $rightPath;
+
+		if (isset($_GET['adel'])) {
+			$this->deleteResource($leftFullpath . '/' . $_GET['adel']);
+
+			// TODO:
+			// b= DIR1/XXX/.. adel=XXX
+			// b= XXX/... adel=XXX
+			$bpath = $rightPath;
+			$pos = strpos($bpath, $_GET['adel']);
+			if ($pos !== false) {
+				if ($pos === 0) { // b= XXX/...
+					$bpath = '';
+				} else {
+					$bpath = substr($bpath, 0, $pos - 1);
+				}
+			}
+
+			redirect('?a=' . urlencode($leftPath) . '&b=' . urlencode($bpath));
+		}
+
+		if (isset($_GET['bdel'])) {
+			$this->deleteResource($rightFullpath . '/' . $_GET['bdel']);
+
+			// TODO:
+			// a= DIR1/XXX/.. bdel=XXX
+			// a= XXX/... bdel=XXX
+			$apath = $leftPath;
+			$pos = strpos($apath, $_GET['bdel']);
+			if ($pos !== false) {
+				if ($pos === 0) { // a= XXX/...
+					$apath = '';
+				} else {
+					$apath = substr($apath, 0, $pos - 1);
+				}
+			}
+
+			redirect('?a=' . urlencode($apath) . '&b=' . urlencode($rightPath));
+		}
 
 		return view('index', [
 			'leftPath'			=> $leftPath,
@@ -73,5 +99,29 @@ class PagesController {
 		}
 
 		return [$panel.'Folders' => $folders, $panel.'Files' => $files];
+	}
+
+	private function deleteResource($path) {
+		if (is_link($path)) {
+			return unlink($path);
+		} elseif (is_dir($path)) {
+			$objects = scandir($path);
+			$ok = true;
+			if (is_array($objects)) {
+				foreach ($objects as $file) {
+					if ($file != '.' && $file != '..') {
+						if (!$this->deleteResource($path . '/' . $file)) {
+							$ok = false;
+						}
+					}
+				}
+			}
+
+			return ($ok) ? rmdir($path) : false;
+		} elseif (is_file($path)) {
+			return unlink($path);
+		}
+
+		return false;
 	}
 }

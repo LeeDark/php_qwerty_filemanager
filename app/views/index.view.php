@@ -36,6 +36,7 @@
 			<td style="width:3%"><label><input type="checkbox" title="Invert selection"></label></td>
 			<td><strong>Name</strong></td>
 			<td style="width:10%"><strong>Size</strong></td>
+			<td style="width:10%"></td>
 		</tr>
 		<?php
 
@@ -64,6 +65,16 @@
 				}
 				
 				echo "<td>FOLDER</td>";
+				if (preg_match('~[0-9]~', $folder) === 1) {
+					echo "<td></td>";
+				} else {
+					$urlfolder = urlencode($folder);
+					echo "<td>
+							<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&adel={$urlfolder}\" onclick=\"return confirm('Delete folder?');\">
+								<img src=\"\\public\\images\\remove.png\"/>
+							</a>
+						</td>";
+				}
 				echo "</tr>";
 			}
 
@@ -72,6 +83,12 @@
 				echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$file\"></label></td>";
 				echo "<td>$file</a></td>";
 				echo "<td>".human_filesize(filesize($leftFullpath . "/" . $file))."</td>";
+				$urlfile = urlencode($file);
+				echo "<td>
+						<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&adel={$urlfile}\" onclick=\"return confirm('Delete file?');\">
+							<img src=\"\\public\\images\\remove.png\"/>
+						</a>
+					</td>";
 				echo "</tr>";
 			}
 
@@ -119,6 +136,16 @@
 				}
 				
 				echo "<td>FOLDER</td>";
+				if (preg_match('~[0-9]~', $folder) === 1) {
+					echo "<td></td>";
+				} else {
+					$urlfolder = urlencode($folder);
+					echo "<td>
+							<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&bdel={$urlfolder}\" onclick=\"return confirm('Delete folder?');\">
+								<img src=\"\\public\\images\\remove.png\"/>
+							</a>
+						</td>";
+				}
 				echo "</tr>";
 			}
 
@@ -127,6 +154,12 @@
 				echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$file\"></label></td>";
 				echo "<td>$file</a></td>";
 				echo "<td>".human_filesize(filesize($rightFullpath . "/" . $file))."</td>";
+				$urlfile = urlencode($file);
+				echo "<td>
+						<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&bdel={$urlfile}\" onclick=\"return confirm('Delete file?');\">
+							<img src=\"\\public\\images\\remove.png\"/>
+						</a>
+					</td>";
 				echo "</tr>";
 			}
 
