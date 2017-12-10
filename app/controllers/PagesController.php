@@ -9,17 +9,31 @@ class PagesController {
 		$root = $_SERVER['DOCUMENT_ROOT'];
 		$requestUri = explode('?', $_SERVER['REQUEST_URI']);
 
-		// ?a=
-		$path = isset($requestUri[1])
-					? explode('=', $requestUri[1])[1] : '';
-		$path = urldecode($path);
-		$fullpath = $root . ($path !== '' ? '/' : '') . $path;
+		if (isset($requestUri[1])) {
+			$leftUri = explode('&', $requestUri[1])[0];
+			$rightUri = explode('&', $requestUri[1])[1];
+		}
+
+		// ?a=...&b=...
+		$leftPath = isset($leftUri)
+					? explode('=', $leftUri)[1] : '';
+		$leftPath = urldecode($leftPath);
+		$leftFullpath = $root . ($leftPath !== '' ? '/' : '') . $leftPath;
+
+		// ?a=...&b=...
+		$rightPath = isset($rightUri)
+					? explode('=', $rightUri)[1] : '';
+		$rightPath = urldecode($rightPath);
+		$rightFullpath = $root . ($rightPath !== '' ? '/' : '') . $rightPath;
 
 		return view('index', [
-			'path'			=> $path,
-			'fullpath' 		=> $fullpath
+			'leftPath'			=> $leftPath,
+			'leftFullpath' 		=> $leftFullpath,
+			'rightPath'			=> $rightPath,
+			'rightFullpath' 	=> $rightFullpath
 			]
-			+ $this->prepareArrays($fullpath)
+			+ $this->prepareArrays('left', $leftFullpath)
+			+ $this->prepareArrays('right', $rightFullpath)
 		);
 
 	}
@@ -34,7 +48,7 @@ class PagesController {
 
 	////
 
-	private function prepareArrays($folder) {
+	private function prepareArrays($panel, $folder) {
 
 		if ($folder === $_SERVER['DOCUMENT_ROOT']) {
 			$result = array_slice(scandir($folder), 2);
@@ -58,6 +72,6 @@ class PagesController {
 			}
 		}
 
-		return ['folders' => $folders, 'files' => $files];
+		return [$panel.'Folders' => $folders, $panel.'Files' => $files];
 	}
 }
