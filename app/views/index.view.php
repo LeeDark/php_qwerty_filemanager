@@ -7,7 +7,8 @@
 <body>
 	<h1>Simple File Manager</h1>
 
-	<h2><a href="folders">Recreate folders</a></h2>
+	<h2><a href="folders">Recreate folders</a> - if you want to create folder structure from beginning...</h2>
+	<h3>PS: Folder structure should be created from first start.</h3>
 
 	<h2>Current folder: 
 		<?php
