@@ -2,6 +2,8 @@
 
 namespace FileManager\Core;
 
+use Exception;
+
 class Router {
 	public $routes = [
 		'GET' => [],
@@ -38,13 +40,13 @@ class Router {
 
 	protected function callAction($controller, $action) {
 		$controller = "FileManager\\Controllers\\{$controller}";
-		$controller = new $controller;
+		$c = new $controller;
 
 		if (! method_exists($controller, $action)) {
 			throw new Exception(
 				"{$controller} does not respond to the {$action} action."
 			);
 		}
-		return $controller->$action();
+		return $c->$action();
 	}
 }
