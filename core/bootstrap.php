@@ -48,6 +48,7 @@ function createFolders($root) {
 		"Октаэдр"
 	];
 
+	// create first level folders randomly with count equals $firstLevel
 	$firstLevelFolders = [];
 	for ($i = 0; $i < $firstLevel; $i++) {
 		$nextIndex = rand(0, count($folders) - 1);
@@ -56,11 +57,11 @@ function createFolders($root) {
 		array_splice($folders, $nextIndex, 1);
 	}
 
+	// create second and third level folders randomly
 	$otherFoldersCount = count($folders);
 	$firstLevelIndex = 0;
 	for ($i = 0; $i < $otherFoldersCount; $i++) {
 		if (count($folders) === 0) {
-			echo "Yahoo!<br>";
 			break;
 		}
 
@@ -69,10 +70,10 @@ function createFolders($root) {
 		makedir($fullpath);
 		array_splice($folders, $secondIndex, 1);
 
+		// here we decide to create or not to create a third-level folder
 		$isThird = (boolean) rand(0, 1);
 		if ($isThird) {
 			if (count($folders) === 0) {
-				echo "Yahoo! Yahoo! Yahoo!<br>";
 				break;
 			}
 
@@ -92,4 +93,16 @@ function makedir($fullpath) {
 	if (!file_exists($fullpath)) {
 		mkdir($fullpath, 0777, true);
 	}
-} 
+}
+
+function human_filesize($bytes, $decimals = 2) {
+	$sz = 'BKMGTP';
+	$factor = floor((strlen($bytes) - 1) / 3);
+	if ($factor == 0) $decimals = 0;
+	return sprintf("%.{$decimals}f ", $bytes / pow(1024, $factor)) . @$sz[$factor];
+}
+
+function getSubPath($path) {
+	$pos = strrpos($path, '/');
+	return $pos === false ? '' : substr($path, 0, $pos);
+}

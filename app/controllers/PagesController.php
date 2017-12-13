@@ -4,15 +4,20 @@ namespace FileManager\Controllers;
 
 class PagesController {
 
+	private $leftPath;
+	private $rightPath;
+
 	public function home() {
 
 		$root = $_SERVER['DOCUMENT_ROOT'];
 
-		$leftPath = isset($_GET['a']) ? urldecode($_GET['a']) : '';
-		$leftFullpath = $root . ($leftPath !== '' ? '/' : '') . $leftPath;
+		$this->leftPath = isset($_GET['a']) ? urldecode($_GET['a']) : '';
+		$currentLeftPath = ($this->leftPath !== '' ? '/' : '') . $this->leftPath;
+		//$leftFullpath = $root . ($this->leftPath !== '' ? '/' : '') . $this->leftPath;
 
-		$rightPath = isset($_GET['b']) ? urldecode($_GET['b']) : '';
-		$rightFullpath = $root . ($rightPath !== '' ? '/' : '') . $rightPath;
+		$this->rightPath = isset($_GET['b']) ? urldecode($_GET['b']) : '';
+		$currentRightPath = ($this->rightPath !== '' ? '/' : '') . $this->rightPath;
+		//$rightFullpath = $root . ($this->rightPath !== '' ? '/' : '') . $this->rightPath;
 
 		if (isset($_GET['adel'])) {
 			$this->deleteResource($leftFullpath . '/' . $_GET['adel']);
@@ -20,7 +25,7 @@ class PagesController {
 			// TODO:
 			// b= DIR1/XXX/.. adel=XXX
 			// b= XXX/... adel=XXX
-			$bpath = $rightPath;
+			$bpath = $this->rightPath;
 			$pos = strpos($bpath, $_GET['adel']);
 			if ($pos !== false) {
 				if ($pos === 0) { // b= XXX/...
@@ -30,7 +35,7 @@ class PagesController {
 				}
 			}
 
-			redirect('?a=' . urlencode($leftPath) . '&b=' . urlencode($bpath));
+			redirect('?a=' . urlencode($this->leftPath) . '&b=' . urlencode($bpath));
 		}
 
 		if (isset($_GET['bdel'])) {
@@ -39,7 +44,7 @@ class PagesController {
 			// TODO:
 			// a= DIR1/XXX/.. bdel=XXX
 			// a= XXX/... bdel=XXX
-			$apath = $leftPath;
+			$apath = $this->leftPath;
 			$pos = strpos($apath, $_GET['bdel']);
 			if ($pos !== false) {
 				if ($pos === 0) { // a= XXX/...
@@ -49,17 +54,17 @@ class PagesController {
 				}
 			}
 
-			redirect('?a=' . urlencode($apath) . '&b=' . urlencode($rightPath));
+			redirect('?a=' . urlencode($apath) . '&b=' . urlencode($this->rightPath));
 		}
 
 		return view('index', [
-			'leftPath'			=> $leftPath,
-			'leftFullpath' 		=> $leftFullpath,
-			'rightPath'			=> $rightPath,
-			'rightFullpath' 	=> $rightFullpath
+			'currentLeftPath'	=> $currentLeftPath,
+			'leftPath'			=> $this->leftPath,
+			'currentRightPath'	=> $currentRightPath,
+			'rightPath'			=> $this->rightPath
 			]
-			+ $this->prepareArrays('left', $leftFullpath)
-			+ $this->prepareArrays('right', $rightFullpath)
+			+ $this->prepareArrays('left', $_SERVER['DOCUMENT_ROOT'] . $currentLeftPath)
+			+ $this->prepareArrays('right', $_SERVER['DOCUMENT_ROOT'] . $currentRightPath)
 		);
 
 	}
@@ -74,31 +79,55 @@ class PagesController {
 
 	////
 
-	private function prepareArrays($panel, $folder) {
+	private function prepareArrays($panel, $fullPath) {
 
-		if ($folder === $_SERVER['DOCUMENT_ROOT']) {
-			$result = array_slice(scandir($folder), 2);
-		} else {
-			$result = scandir($folder);
-		}
-
-		// filter for hidden folders and files
-		//$result = array_filter($result, function($value) {
-		//	return mb_substr($value, 0, 1) != '.';
-		//});
+		$result = scandir($fullPath);
+		if ($fullPath === $_SERVER['DOCUMENT_ROOT'])
+			$result = array_slice($result, 2);
 
 		$folders = [];
 		$files = [];
-		foreach ($result as $value) {
-			$fullname = $folder . ($folder === '/' ? '' : '/') . $value;
+		foreach ($result as $folderOrFile) {
+			$fullname = $fullPath . ($fullPath === '/' ? '' : '/') . $folderOrFile;
 			if (is_dir($fullname)) {
-				$folders[] = $value;
+				$preparedFolder = $this->prepareFolder($panel, $folderOrFile);
+				$folders[$folderOrFile] = $preparedFolder;
 			} else {
-				$files[] = $value;
+				$files[] = $folderOrFile;
 			}
 		}
 
 		return [$panel.'Folders' => $folders, $panel.'Files' => $files];
+	}
+
+	// prepare folder
+	private function prepareFolder($panel, $folder) {
+		// only if folder name doesn't consist any numbers
+		$path = $panel === 'left' ? $this->leftPath : $this->rightPath;
+		if (preg_match('~[0-9]~', $folder) !== 1) {
+			// "." to return to the folder 2 levels higher
+			if ($folder === ".") {
+				$href = urlencode(
+					getSubPath(getSubPath($path))
+				);
+			// ".." to return to the folder 1 level higher
+			} elseif ($folder === "..") {
+				$href = urlencode(
+					getSubPath($path)
+				);
+			} else {
+				$href = urlencode(	
+					$path . ($path === '' ? '' : '/') . $folder
+				);
+			}
+		
+			if ($panel === 'left')
+				return "<a href=\"?a={$href}&b={$this->rightPath}\">{$folder}</a>";
+			elseif ($panel === 'right')
+				return "<a href=\"?a={$this->leftPath}&b={$href}\">{$folder}</a>";
+		}
+
+		return $folder;
 	}
 
 	private function deleteResource($path) {

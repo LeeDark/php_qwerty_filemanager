@@ -11,27 +11,8 @@
 	<h2><a href="folders">Recreate folders</a> - if you want to create folder structure from beginning...</h2>
 	<h3>PS: Folder structure should be created from first start.</h3>
 
-	<?php
-		function human_filesize($bytes, $decimals = 2) {
-			$sz = 'BKMGTP';
-			$factor = floor((strlen($bytes) - 1) / 3);
-			if ($factor == 0) $decimals = 0;
-			return sprintf("%.{$decimals}f ", $bytes / pow(1024, $factor)) . @$sz[$factor];
-		}
-
-		function getSubPath($path) {
-			$pos = strrpos($path, '/');
-			return $pos === false ? '' : substr($path, 0, $pos);
-		}
-	?>
-
 	<div id="left">
-	<h2>Current folder: 
-		<?php
-			$current = $leftPath === '' ? "ROOT" : "ROOT/$leftPath";
-			echo $current;
-		?>
-	</h2>
+	<h2>Current folder: <?= "ROOT{$currentLeftPath}"; ?></h2>
 	<table>
 		<tr>
 			<td style="width:3%"><label><input type="checkbox" title="Invert selection"></label></td>
@@ -39,132 +20,106 @@
 			<td style="width:10%"><strong>Size</strong></td>
 			<td style="width:10%"></td>
 		</tr>
-		<?php
 
-			foreach ($leftFolders as $folder) {
-				if ($folder === ".") {
-					$href = urlencode(
-						getSubPath(getSubPath($leftPath))
-					);
-				} elseif ($folder === "..") {
-					$href = urlencode(
-						getSubPath($leftPath)
-					);
-				} else {
-					$href = urlencode(	
-						$leftPath . ($leftPath === '' ? '' : '/') . $folder
-					);
-				}
+		<?php foreach ($leftFolders as $folder => $folderOutput) : ?>
+		<tr>
+			<td>
+				<label>
+					<input type="checkbox" value="<?= $folder; ?>">
+				</label>
+			</td>
+			<td><?= $folderOutput; ?></td>
+			<td>FOLDER</td>
+			<?php if ($folderOutput !== $folder) : ?>
+			<td></td>
+			<?php else : ?>
+			<td>
+				<a 	title="Delete"
+					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&adel=<?=urlencode($folder)?>"
+					onclick="return confirm('Delete folder?');">
 
-				echo "<tr>";
-				echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$folder\"></label></td>";
+					<img src="\public\images\remove.png"/>
+				</a>
+			</td>
+			<?php endif; ?>
+		</tr>
+		<?php endforeach; ?>
 
-				if (preg_match('~[0-9]~', $folder) === 1) {
-					echo "<td>{$folder}</td>";
-				} else {
-					echo "<td><a href=\"?a={$href}&b={$rightPath}\">{$folder}</a></td>";
-				}
-				
-				echo "<td>FOLDER</td>";
-				if (preg_match('~[0-9]~', $folder) === 1) {
-					echo "<td></td>";
-				} else {
-					$urlfolder = urlencode($folder);
-					echo "<td>
-							<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&adel={$urlfolder}\" onclick=\"return confirm('Delete folder?');\">
-								<img src=\"\\public\\images\\remove.png\"/>
-							</a>
-						</td>";
-				}
-				echo "</tr>";
-			}
+		<?php foreach ($leftFiles as $file) : ?>
+		<tr>
+			<td>
+				<label>
+					<input type="checkbox" value="<?= $folder; ?>">
+				</label>
+			</td>
+			<td><?= $file; ?></td>
+			<td><?= human_filesize(filesize($_SERVER['DOCUMENT_ROOT'] . $currentLeftPath . "/" . $file)) ?></td>
+			<td>
+				<a 	title="Delete"
+					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&adel=<?=urlencode($file)?>"
+					onclick="return confirm('Delete file?');">
 
-			foreach ($leftFiles as $file) {
-				echo "<tr>";
-				echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$file\"></label></td>";
-				echo "<td>$file</a></td>";
-				echo "<td>".human_filesize(filesize($leftFullpath . "/" . $file))."</td>";
-				$urlfile = urlencode($file);
-				echo "<td>
-						<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&adel={$urlfile}\" onclick=\"return confirm('Delete file?');\">
-							<img src=\"\\public\\images\\remove.png\"/>
-						</a>
-					</td>";
-				echo "</tr>";
-			}
+					<img src="\public\images\remove.png"/>
+				</a>
+			</td>
+		</tr>
+		<?php endforeach; ?>
 
-		?>
 	</table>
 	</div>
 
 	<div id="right">
-	<h2>Current folder: 
-		<?php
-			$current = $rightPath === '' ? "ROOT" : "ROOT/$rightPath";
-			echo $current;
-		?>
-	</h2>
+	<h2>Current folder: <?= "ROOT{$currentRightPath}"; ?></h2>
 	<table>
 		<tr>
 			<td style="width:3%"><label><input type="checkbox" title="Invert selection"></label></td>
 			<td><strong>Name</strong></td>
 			<td style="width:10%"><strong>Size</strong></td>
 		</tr>
-		<?php
 
-			foreach ($rightFolders as $folder) {
-				if ($folder === ".") {
-					$href = urlencode(
-						getSubPath(getSubPath($rightPath))
-					);
-				} elseif ($folder === "..") {
-					$href = urlencode(
-						getSubPath($rightPath)
-					);
-				} else {
-					$href = urlencode(	
-						$rightPath . ($rightPath === '' ? '' : '/') . $folder
-					);
-				}
+		<?php foreach ($rightFolders as $folder => $folderOutput) : ?>
+		<tr>
+			<td>
+				<label>
+					<input type="checkbox" value="<?= $folder; ?>">
+				</label>
+			</td>
+			<td><?= $folderOutput; ?></td>
+			<td>FOLDER</td>
+			<?php if ($folderOutput !== $folder) : ?>
+			<td></td>
+			<?php else : ?>
+			<td>
+				<a 	title="Delete"
+					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&adel=<?=urlencode($folder)?>"
+					onclick="return confirm('Delete folder?');">
 
-				echo "<tr>";
-				echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$folder\"></label></td>";
+					<img src="\public\images\remove.png"/>
+				</a>
+			</td>
+			<?php endif; ?>
+		</tr>
+		<?php endforeach; ?>
 
-				if (preg_match('~[0-9]~', $folder) === 1) {
-					echo "<td>{$folder}</td>";
-				} else {
-					echo "<td><a href=\"?a={$leftPath}&b={$href}\">{$folder}</a></td>";
-				}
-				
-				echo "<td>FOLDER</td>";
-				if (preg_match('~[0-9]~', $folder) === 1) {
-					echo "<td></td>";
-				} else {
-					$urlfolder = urlencode($folder);
-					echo "<td>
-							<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&bdel={$urlfolder}\" onclick=\"return confirm('Delete folder?');\">
-								<img src=\"\\public\\images\\remove.png\"/>
-							</a>
-						</td>";
-				}
-				echo "</tr>";
-			}
+		<?php foreach ($rightFiles as $file) : ?>
+		<tr>
+			<td>
+				<label>
+					<input type="checkbox" value="<?= $folder; ?>">
+				</label>
+			</td>
+			<td><?= $file; ?></td>
+			<td><?= human_filesize(filesize($_SERVER['DOCUMENT_ROOT'] . $currentRightPath . "/" . $file)) ?></td>
+			<td>
+				<a 	title="Delete"
+					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&adel=<?=urlencode($file)?>"
+					onclick="return confirm('Delete file?');">
 
-			foreach ($rightFiles as $file) {
-				echo "<tr>";
-				echo "<td><label><input type=\"checkbox\" name=\"file[]\" value=\"$file\"></label></td>";
-				echo "<td>$file</a></td>";
-				echo "<td>".human_filesize(filesize($rightFullpath . "/" . $file))."</td>";
-				$urlfile = urlencode($file);
-				echo "<td>
-						<a title=\"Delete\" href=\"?a={$leftPath}&b={$rightPath}&bdel={$urlfile}\" onclick=\"return confirm('Delete file?');\">
-							<img src=\"\\public\\images\\remove.png\"/>
-						</a>
-					</td>";
-				echo "</tr>";
-			}
-
-		?>
+					<img src="\public\images\remove.png"/>
+				</a>
+			</td>
+		</tr>
+		<?php endforeach; ?>
 	</table>
 	</div>
 
