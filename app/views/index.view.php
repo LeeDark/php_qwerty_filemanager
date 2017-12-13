@@ -30,7 +30,7 @@
 			</td>
 			<td><?= $folderOutput; ?></td>
 			<td>FOLDER</td>
-			<?php if ($folderOutput !== $folder) : ?>
+			<?php if ($folderOutput === $folder) : ?>
 			<td></td>
 			<?php else : ?>
 			<td>
@@ -86,12 +86,12 @@
 			</td>
 			<td><?= $folderOutput; ?></td>
 			<td>FOLDER</td>
-			<?php if ($folderOutput !== $folder) : ?>
+			<?php if ($folderOutput === $folder) : ?>
 			<td></td>
 			<?php else : ?>
 			<td>
 				<a 	title="Delete"
-					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&adel=<?=urlencode($folder)?>"
+					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&bdel=<?=urlencode($folder)?>"
 					onclick="return confirm('Delete folder?');">
 
 					<img src="\public\images\remove.png"/>
@@ -112,7 +112,7 @@
 			<td><?= human_filesize(filesize($_SERVER['DOCUMENT_ROOT'] . $currentRightPath . "/" . $file)) ?></td>
 			<td>
 				<a 	title="Delete"
-					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&adel=<?=urlencode($file)?>"
+					href="?a=<?=$leftPath?>&b=<?=$rightPath?>&bdel=<?=urlencode($file)?>"
 					onclick="return confirm('Delete file?');">
 
 					<img src="\public\images\remove.png"/>

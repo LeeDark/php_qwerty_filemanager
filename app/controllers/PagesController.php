@@ -13,11 +13,9 @@ class PagesController {
 
 		$this->leftPath = isset($_GET['a']) ? urldecode($_GET['a']) : '';
 		$currentLeftPath = ($this->leftPath !== '' ? '/' : '') . $this->leftPath;
-		//$leftFullpath = $root . ($this->leftPath !== '' ? '/' : '') . $this->leftPath;
 
 		$this->rightPath = isset($_GET['b']) ? urldecode($_GET['b']) : '';
 		$currentRightPath = ($this->rightPath !== '' ? '/' : '') . $this->rightPath;
-		//$rightFullpath = $root . ($this->rightPath !== '' ? '/' : '') . $this->rightPath;
 
 		if (isset($_GET['adel'])) {
 			$this->deleteResource($leftFullpath . '/' . $_GET['adel']);
@@ -63,8 +61,8 @@ class PagesController {
 			'currentRightPath'	=> $currentRightPath,
 			'rightPath'			=> $this->rightPath
 			]
-			+ $this->prepareArrays('left', $_SERVER['DOCUMENT_ROOT'] . $currentLeftPath)
-			+ $this->prepareArrays('right', $_SERVER['DOCUMENT_ROOT'] . $currentRightPath)
+			+ $this->prepareArrays('left', $root . $currentLeftPath)
+			+ $this->prepareArrays('right', $root . $currentRightPath)
 		);
 
 	}
