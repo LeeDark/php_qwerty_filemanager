@@ -4,22 +4,15 @@ namespace FileManager\Controllers;
 
 class PagesController {
 
+	private $path;
+
 	public function home() {
 
-		$root = $_SERVER['DOCUMENT_ROOT'];
-		$requestUri = explode('?', $_SERVER['REQUEST_URI']);
+		$this->path = isset($_GET['a']) ? urldecode($_GET['a']) : '';
+		$currentPath = ($this->path !== '' ? '/' : '') . $this->path;
 
-		// ?a=
-		$path = isset($requestUri[1])
-					? explode('=', $requestUri[1])[1] : '';
-		$path = urldecode($path);
-		$fullpath = $root . ($path !== '' ? '/' : '') . $path;
-
-		return view('index', [
-			'path'			=> $path,
-			'fullpath' 		=> $fullpath
-			]
-			+ $this->prepareArrays($fullpath)
+		return view('index', ['currentPath' => $currentPath]
+			+ $this->prepareArrays($_SERVER['DOCUMENT_ROOT'] . $currentPath)
 		);
 
 	}
@@ -34,30 +27,49 @@ class PagesController {
 
 	////
 
-	private function prepareArrays($folder) {
+	// prepare folders and files arrays for view
+	private function prepareArrays($fullPath) {
 
-		if ($folder === $_SERVER['DOCUMENT_ROOT']) {
-			$result = array_slice(scandir($folder), 2);
-		} else {
-			$result = scandir($folder);
-		}
-
-		// filter for hidden folders and files
-		//$result = array_filter($result, function($value) {
-		//	return mb_substr($value, 0, 1) != '.';
-		//});
+		$result = scandir($fullPath);
+		if ($fullPath === $_SERVER['DOCUMENT_ROOT'])
+			$result = array_slice($result, 2);
 
 		$folders = [];
 		$files = [];
-		foreach ($result as $value) {
-			$fullname = $folder . ($folder === '/' ? '' : '/') . $value;
+		foreach ($result as $folderOrFile) {
+			$fullname = $fullPath . ($fullPath !== '/' ? '/' : '') . $folderOrFile;
 			if (is_dir($fullname)) {
-				$folders[] = $value;
+				$this->prepareFolder($folderOrFile);
+				$folders[] = $folderOrFile;
 			} else {
-				$files[] = $value;
+				$files[] = $folderOrFile;
 			}
 		}
 
 		return ['folders' => $folders, 'files' => $files];
+	}
+
+	// prepare folder
+	private function prepareFolder(&$folder) {
+		// only if folder name doesn't consist any numbers
+		if (preg_match('~[0-9]~', $folder) !== 1) {
+			// "." to return to the folder 2 levels higher
+			if ($folder === ".") {
+				$href = urlencode(
+					getSubPath(getSubPath($this->path))
+				);
+			// ".." to return to the folder 1 level higher
+			} elseif ($folder === "..") {
+				$href = urlencode(
+					getSubPath($this->path)
+				);
+			} else {
+				$href = urlencode(	
+					$this->path . ($this->path === '' ? '' : '/') . $folder
+				);
+			}
+		
+			$folder = "<a href=\"?a={$href}\">{$folder}</a>";
+		}
 	}
 }
